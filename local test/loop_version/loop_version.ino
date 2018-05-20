@@ -1,14 +1,22 @@
 #include "LedControl.h"
+#include <EEPROM.h>
+
 LedControl lc=LedControl(12,11,10,3);
-char scores[] = {5, 10, 15, 20, 25, 30, 35, 40};
+int scores[7] = {};
 
 void setup() {
+  Serial.begin(115200);
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.shutdown(index, false);
     lc.setIntensity(index, 15);
   }
   clearDigits();
-	
+  delay(100);
+  //get the data from eeprom
+	for(int i=0;i<10;i++){
+    scores[i]= EEPROM.read(i);
+  }
+  delay(100);
 }
 
 void loop() {
@@ -18,20 +26,7 @@ void loop() {
     Display(index+1, index+1, scores[index]);
   }
   
-
-  /*
-  for(int i=0;i<8;i++){
-    clearDigits();
-    Display(i+1, 1, 111);
-    delay(10);
-  }*/
-
-  /*
-  for(int i=0;i<8;i++){
-    scores[i] = scores[i]+1;
-  }
-  */
-  delay(500);
+  delay(1000);
 }
 
 
@@ -130,16 +125,21 @@ int Display(int row, int group, int score){
 	dp2 = GetNumber(score,2);
 	
 	lc.setDigit(addr1, digit1, (byte)value1, 0);	//group digit
-	lc.setDigit(addr2, digit2, (byte)value2, dp2);	//score tens digit
+	lc.setDigit(addr2, digit2, (byte)value2, dp2);	//score tens and hundreds digit
 	lc.setDigit(addr3, digit3, (byte)value3, 0);	//score ones digit
-  //lc.setDigit(0, 0, (byte)1, 0);
+  /*
+  Serial.print("Group: ");s
+  Serial.print(value1);
+  Serial.print(" Score: ");
+  Serial.print(score);
+  Serial.println();*/
 }
 
 //places: 0=ones 1=tens 2=hundreds
 int GetNumber(int v, int places){
 	int ones;  
   int tens;  
-  bool hundreds; 
+  boolean hundreds; 
 
   if(v <= 0 || v > 198){
 		return;  
