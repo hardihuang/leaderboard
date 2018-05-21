@@ -3,8 +3,8 @@
 
 LedControl lc=LedControl(12,11,10,3);
 int scores[2][8]{
-  {12,15,42,63,45,76,21,93},
-  {2,8,3,7,4,6,5,1}  
+  //{12,15,42,63,45,0,0,0},
+  //{2,4,1,3,5,0,0,0}  
 };
 
 void setup() {
@@ -15,7 +15,7 @@ void setup() {
   }
   clearDigits();
   delay(100);
-  //fetchData();
+  fetchData();
   sort(scores,8);
 }
 
@@ -42,6 +42,10 @@ int Display(int row, int group, int score){
   int value3;
   boolean dp2;
   
+  if(group == 0){
+    group = 0XFF;  
+    score = 0XFF;
+  }
   
 	switch(row){
 
@@ -142,7 +146,7 @@ int GetNumber(int v, int places){
   boolean hundreds; 
 
   if(v <= 0 || v > 198){
-		return;  
+		return v;  
 	}
     ones=v%10;  
     v=v/10;  
@@ -184,7 +188,8 @@ void sort(int a[2][8], int size) {
 
 void fetchData(){
   for(int i=0;i<8;i++){
-    //scores[i]= EEPROM.read(i);
+    scores[0][i]= EEPROM.read(i);
+    scores[1][i]= EEPROM.read(i+8);
   }  
 }
 
