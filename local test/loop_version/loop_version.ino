@@ -1,36 +1,33 @@
 #include "LedControl.h"
 #include <EEPROM.h>
-
 LedControl lc=LedControl(12,11,10,3);
-int scores[2][8]{};
+int scores[2][8]{};//score array saves the group number and the score, and the order
 
 void setup() {
   Serial.begin(9600);
   
   //inserting the dummy data to the eeprom
   int dommyData[2][8]{
-    {179,165,6,35,98,72,0,0},
+    {5,165,6,35,35,72,0,0},
     {1,2,3,4,5,6,0,0}  
   };
-  for(int i=0;i<8;i++){
-    EEPROM.write(i, dommyData[0][i]);
-    EEPROM.write(i+8, dommyData[1][i]);
-  }
+  writeData(dommyData);
   
-  
+  //initialize the program
   for(int index=0; index<lc.getDeviceCount();index++){
-    lc.shutdown(index, false);
-    lc.setIntensity(index, 15);
+    lc.shutdown(index, false);  //wake up all the MAX7219 ICs
+    lc.setIntensity(index, 15); //set the Intensity to the max value 0-15
   }
   clearDigits();
-  delay(100);
-  fetchData();
-  sort(scores,8);
+
+  fetchData();  //fetch the data from the eeprom
+  sort(scores,8); //sort the data array
 }
 
 void loop() {
   //clearDigits();
-	
+
+  //rander the data one row at a time to display all the data
 	for(int index=0; index<8; index++){
     Display(index+1, scores[1][index], scores[0][index]);
   }
@@ -50,12 +47,14 @@ int Display(int row, int group, int score){
   int value2;
   int value3;
   boolean dp2;
-  
+
+  //group == 0 means this group is deactivited, so set send 0XFF to turn off this row
   if(group == 0){
     group = 0XFF;  
     score = 0XFF;
   }
-  
+
+  //map each digit address to the value for each row
 	switch(row){
 
 		case 1:	
@@ -200,6 +199,16 @@ void fetchData(){
     scores[0][i]= EEPROM.read(i);
     scores[1][i]= EEPROM.read(i+8);
   }  
+}
+
+void writeData(int data[2][8]){
+  for(int i=0;i<8;i++){
+    if(data[1][i] == 0){  //is the group is deactivited?
+      data[0][i] = 0;     //clear the score data as well
+    }
+    EEPROM.write(i, data[0][i]);
+    EEPROM.write(i+8, data[1][i]);
+  }
 }
 
 
