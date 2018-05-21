@@ -2,7 +2,10 @@
 #include <EEPROM.h>
 
 LedControl lc=LedControl(12,11,10,3);
-int scores[7] = {};
+int scores[2][8]{
+  {12,15,42,63,45,76,21,93},
+  {2,8,3,7,4,6,5,1}  
+};
 
 void setup() {
   Serial.begin(115200);
@@ -12,18 +15,14 @@ void setup() {
   }
   clearDigits();
   delay(100);
-  //get the data from eeprom
-	for(int i=0;i<10;i++){
-    scores[i]= EEPROM.read(i);
-  }
-  delay(100);
+  //fetchData();
 }
 
 void loop() {
   //clearDigits();
 	
 	for(int index=0; index<8; index++){
-    Display(index+1, index+1, scores[index]);
+    Display(index+1, scores[1][index], scores[0][index]);
   }
   
   delay(1000);
@@ -165,4 +164,10 @@ void clearDigits(){
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.clearDisplay(index);
   }
+}
+
+void fetchData(){
+  for(int i=0;i<8;i++){
+    //scores[i]= EEPROM.read(i);
+  }  
 }
