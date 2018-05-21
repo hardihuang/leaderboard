@@ -2,13 +2,22 @@
 #include <EEPROM.h>
 
 LedControl lc=LedControl(12,11,10,3);
-int scores[2][8]{
-  //{12,15,42,63,45,0,0,0},
-  //{2,4,1,3,5,0,0,0}  
-};
+int scores[2][8]{};
 
 void setup() {
   Serial.begin(9600);
+  
+  //inserting the dummy data to the eeprom
+  int dommyData[2][8]{
+    {179,165,6,35,98,72,0,0},
+    {1,2,3,4,5,6,0,0}  
+  };
+  for(int i=0;i<8;i++){
+    EEPROM.write(i, dommyData[0][i]);
+    EEPROM.write(i+8, dommyData[1][i]);
+  }
+  
+  
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.shutdown(index, false);
     lc.setIntensity(index, 15);
