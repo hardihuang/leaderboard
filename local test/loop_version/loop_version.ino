@@ -8,7 +8,7 @@ int scores[2][8]{
 };
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.shutdown(index, false);
     lc.setIntensity(index, 15);
@@ -16,6 +16,7 @@ void setup() {
   clearDigits();
   delay(100);
   //fetchData();
+  sort(scores,8);
 }
 
 void loop() {
@@ -166,8 +167,25 @@ void clearDigits(){
   }
 }
 
+void sort(int a[2][8], int size) {
+    for(int i=0; i<(size-1); i++) {
+        for(int o=0; o<(size-(i+1)); o++) {
+                if(a[0][o] < a[0][o+1]) {
+                    int t = a[0][o];
+                    int u = a[1][o];
+                    a[0][o] = a[0][o+1];
+                    a[1][o] = a[1][o+1];
+                    a[0][o+1] = t;
+                    a[1][o+1] = u;
+                }
+        }
+    }
+}
+
 void fetchData(){
   for(int i=0;i<8;i++){
     //scores[i]= EEPROM.read(i);
   }  
 }
+
+
