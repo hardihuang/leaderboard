@@ -20,7 +20,7 @@ void setup() {
     {72,63,135,17,86,99,38,0},
     {1,2,3,4,5,6,7,0}  
   };
-  //writeData(dummyData);
+  writeData(dummyData);
 
 //initialize the program
   //IR receiver
@@ -45,7 +45,6 @@ void loop() {
     if(key>48 and key<57 and state == 0){ //pressed 1-8 group number and in display mode
       state = 1;//edit group mode
       selectedGroup = key-48;//set the group number
-      
     }
     if(state == 1){
       if(key == 97){//pressed up button
@@ -62,9 +61,10 @@ void loop() {
         addGroup();
       }
     }
-
-    
-    scores[0][0]=key-48;
+    if(key == 48 and state == 1){//exit edit group mode
+      state = 0;
+      selectedGroup = 0;
+    }
     sort(scores,8);
     writeData(scores);
     drawScreen();
@@ -279,7 +279,10 @@ void clearDigits(){
 
 void addScore(){
   //find the selectedGroup index in the scores array  
+  searchGroup();
   //add one to that group score
+  scores[0][groupIndex]++;
+  groupIndex = 10;
 }
 
 void minusScore(){
