@@ -8,7 +8,7 @@ int receiver = 9;
 IRrecv irrecv(receiver);
 decode_results results;
 
-int state = 0; //0=display; 1=update Score; 2=update Group; 3=reset
+int state = 0; //0=display; 1=edit Group; 2=reset
 int selectedGroup = 0;  //which group we are dealing with
 int scores[2][8]{};//score array saves the group number and the score, and the order
 int key = 0;  //what key is pressed
@@ -41,6 +41,28 @@ void setup() {
 void loop() {
   getKeys();
   if(key){
+    if(key>48 and key<57 and state == 0){ //pressed 1-8 group number and in display mode
+      state = 1;//edit group mode
+      selectedGroup = key-48;//set the group number
+      
+    }
+    if(state == 1){
+      if(key == 97){//pressed up button
+        //add one point to the selected group 
+        addScore();
+      }else if(key == 101){//pressed down button
+        //minus one point to the selected group  
+        minusScore();
+      }else if(key == 42){//pressed * button
+        //delete this selected group  
+        deleteGroup();
+      }else if(key == 35){//pressed # button
+        //add this selected group
+        addGroup();
+      }
+    }
+
+    
     scores[0][0]=key-48;
     sort(scores,8);
     writeData(scores);
@@ -252,4 +274,22 @@ void clearDigits(){
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.clearDisplay(index);
   }
+}
+
+void addScore(){
+  //find the selectedGroup index in the scores array  
+  //add one to that group score
+}
+
+void minusScore(){
+  
+}
+
+void addGroup(){
+  //if the group does not exist now
+  //add the group number into the scores array
+}
+
+void deleteGroup(){
+  
 }
