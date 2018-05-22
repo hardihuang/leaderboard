@@ -5,6 +5,7 @@ int receiver = 9; // Signal Pin of IR receiver to Arduino Digital Pin 11
 /*-----( Declare objects )-----*/
 IRrecv irrecv(receiver);     // create instance of 'irrecv'
 decode_results results;      // create instance of 'decode_results'
+int key = 0;  //what key is pressed
 
 void setup()   /*----( SETUP: RUNS ONCE )----*/
 {
@@ -17,48 +18,40 @@ void setup()   /*----( SETUP: RUNS ONCE )----*/
 
 void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
 {
-  if (irrecv.decode(&results)) // have we received an IR signal?
-
-  {
-     int command = translateIR();
-    if(command == '1'){
-        scores[0][0]++;
-        for(int index=0; index<8; index++){
-          Display(index+1, scores[1][index], scores[0][index]);
-        }
+  getKeys();
+    if(key){
+      Serial.println(key);
+      key = 0;
     }
-    irrecv.resume(); // receive the next value
-  }  
+
 }/* --(end main loop )-- */
 
 /*-----( Function )-----*/
+void getKeys(){
+  if(irrecv.decode(&results)){ // have we received an IR signal?
 
-int translateIR(){ // takes action based on IR code received
-  char btn=0;
-  switch(results.value){
-    case 0xFF629D: btn = "add"; break;
-    case 0xFF22DD: btn = "left";    break;
-    case 0xFF02FD: btn = "ok";    break;
-    case 0xFFC23D: btn = "right";   break;
-    case 0xFFA857: btn = "minus"; break;
-    case 0xFF6897: btn = 1;    break;
-    case 0xFF9867: btn = 2;    break;
-    /*
-    case 0xFFB04F: Serial.println(" 3");    break;
-    case 0xFF30CF: Serial.println(" 4");    break;
-    case 0xFF18E7: Serial.println(" 5");    break;
-    case 0xFF7A85: Serial.println(" 6");    break;
-    case 0xFF10EF: Serial.println(" 7");    break;
-    case 0xFF38C7: Serial.println(" 8");    break;
-    case 0xFF5AA5: Serial.println(" 9");    break;
-    case 0xFF42BD: Serial.println(" *");    break;
-    case 0xFF4AB5: Serial.println(" 0");    break;
-    case 0xFF52AD: Serial.println(" #");    break;
-    case 0xFFFFFFFF: Serial.println(" REPEAT");break;  
-  */
-    default: 
-      btn = "other button";
-  }
-  return btn;
-  delay(500); // Do not get immediate repeat
-} 
+    switch(results.value){
+      case 0xFF629D: key = 'a'; break;//add
+      case 0xFF22DD: key = 'b'; break;//left
+      case 0xFF02FD: key = 'c'; break;//ok
+      case 0xFFC23D: key = 'd'; break;//right
+      case 0xFFA857: key = 'e'; break;//minus
+      case 0xFF6897: key = '1'; break;
+      case 0xFF9867: key = '2'; break;
+      case 0xFFB04F: key = '3'; break;
+      case 0xFF30CF: key = '4'; break;
+      case 0xFF18E7: key = '5'; break;
+      case 0xFF7A85: key = '6'; break;
+      case 0xFF10EF: key = '7'; break;
+      case 0xFF38C7: key = '8'; break;
+      case 0xFF5AA5: key = '9'; break;
+      case 0xFF42BD: key = '*'; break;
+      case 0xFF4AB5: key = '0'; break;
+      case 0xFF52AD: key = '#'; break;
+      default: 
+        key = 0;//other button
+    }
+    
+    irrecv.resume(); // receive the next value
+  } 
+}
