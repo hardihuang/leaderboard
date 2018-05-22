@@ -1,19 +1,28 @@
 #include "LedControl.h"
+#include "IRremote.h"
 #include <EEPROM.h>
 LedControl lc=LedControl(12,11,10,3);
 int scores[2][8]{};//score array saves the group number and the score, and the order
+int receiver = 9;
+int command = 0;
+
+IRrecv irrecv(receiver);     // create instance of 'irrecv'
+decode_results results; 
 
 void setup() {
   Serial.begin(9600);
   
   //inserting the dummy data to the eeprom
-  int dommyData[2][8]{
+  int dummyData[2][8]{
     {5,165,6,35,35,72,0,0},
     {1,2,3,4,5,6,0,0}  
   };
-  writeData(dommyData);
+  writeData(dummyData);
+  
   
   //initialize the program
+  irrecv.enableIRIn(); // Start the receiver
+  
   for(int index=0; index<lc.getDeviceCount();index++){
     lc.shutdown(index, false);  //wake up all the MAX7219 ICs
     lc.setIntensity(index, 15); //set the Intensity to the max value 0-15
@@ -25,6 +34,10 @@ void setup() {
 }
 
 void loop() {
+  if(irrecv.decode(&results)){ // have we received an IR signal?
+    translateIR();
+    irrecv.resume(); // receive the next value
+  } 
   //clearDigits();
 
   //rander the data one row at a time to display all the data
@@ -211,4 +224,41 @@ void writeData(int data[2][8]){
   }
 }
 
+int translateIR(){ // takes action based on IR code received
+  int btn=0;
+  switch(results.value){
+    case 0xFF629D: btn = "add"; break;
+    case 0xFF22DD: btn = "left";    break;
+    case 0xFF02FD: btn = "ok";    break;
+    case 0xFFC23D: btn = "right";   break;
+    case 0xFFA857: btn = "minus"; break;
+    case 0xFF6897: btn = 1;    break;
+    case 0xFF9867: btn = 2;    break;
+    /*
+    case 0xFFB04F: Serial.println(" 3");    break;
+    case 0xFF30CF: Serial.println(" 4");    break;
+    case 0xFF18E7: Serial.println(" 5");    break;
+    case 0xFF7A85: Serial.println(" 6");    break;
+    case 0xFF10EF: Serial.println(" 7");    break;
+    case 0xFF38C7: Serial.println(" 8");    break;
+    case 0xFF5AA5: Serial.println(" 9");    break;
+    case 0xFF42BD: Serial.println(" *");    break;
+    case 0xFF4AB5: Serial.println(" 0");    break;
+    case 0xFF52AD: Serial.println(" #");    break;
+    case 0xFFFFFFFF: Serial.println(" REPEAT");break;  
+  */
+    default: 
+      btn = "other button";
+  }
+  return btn;
+  delay(500); // Do not get immediate repeat
+} 
 
+void updataScreen(){
+  sort(scores,8); //sort the data array
+  writeData(scores);
+  //rander the data one row at a time to display all the data
+  for(int index=0; index<8; index++){  
+    Display(index+1, scores[1][index], scores[0][index]);
+  }
+}
