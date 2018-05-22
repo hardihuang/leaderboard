@@ -41,7 +41,9 @@ void setup() {
 void loop() {
   getKeys();
   if(key){
-    scores[0][0]='key';
+    scores[0][0]=key-48;
+    sort(scores,8);
+    writeData(scores);
     drawScreen();
     key = 0;
   }
@@ -239,7 +241,7 @@ void getKeys(){
       case 0xFF4AB5: key = '0'; break;
       case 0xFF52AD: key = '#'; break;
       default: 
-        key = 'f';//other button
+        key = 0;//other button we don't care
     }
     
     irrecv.resume(); // receive the next value
