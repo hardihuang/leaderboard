@@ -10,6 +10,7 @@ decode_results results;
 
 int state = 0; //0=display; 1=edit Group; 2=reset
 int selectedGroup = 0;  //which group we are dealing with
+int groupIndex = 10; //10 is a flag for nothing
 int scores[2][8]{};//score array saves the group number and the score, and the order
 int key = 0;  //what key is pressed
 
@@ -292,4 +293,12 @@ void addGroup(){
 
 void deleteGroup(){
   
+}
+
+void searchGroup(){
+  for(int i=0; groupIndex == 10; i++){
+    if(scores[1][i]==selectedGroup){
+      groupIndex = i;  
+    }
+  }
 }
