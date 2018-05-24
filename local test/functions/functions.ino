@@ -18,13 +18,13 @@ int scores[2][8]{};//score array saves the group number and the score, and the o
 int key = 0;  //what key is pressed
 
 void setup() {
-  Serial.print(9600);
+  //Serial.print(9600);
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-     {0,0,0,0,0,0,0,0},
-     {1,2,3,4,5,6,7,0}  
+    {5,165,6,35,35,72,0,0},
+    {1,2,3,4,5,6,0,0}   
    };
-  writeData(dummyData);
+  //writeData(dummyData);
 
 //initialize the program
   //IR receiver
@@ -79,6 +79,13 @@ void loop() {
         endIndex = 8;
       }
     }
+    if(key == 98 and state == 0){//in the display mode, user pressed left button
+      state = 2;
+    }else if(state == 2 and key == 100){//in the reset mode, user pressed right button
+      resetData();
+      clearDigits();
+      state = 0;
+    }
     
     key = 0;
     sort(scores,8);
@@ -126,7 +133,7 @@ int GetNumber(int v, int places){
   int tens;  
   boolean hundreds; 
 
-  if(v <= 0 || v > 198){
+  if(v <= 0 || v > 199){
     return v;  
   }
     ones=v%10;  
@@ -306,14 +313,18 @@ void addScore(){
   //find the selectedGroup index in the scores array  
   searchGroup();
   //add one to that group score
-  scores[0][groupIndex]++;
+  if(scores[0][groupIndex]<199){
+    scores[0][groupIndex]++;
+  }
   groupIndex = 10;
 }
 
 void minusScore(){
   searchGroup();
   //add one to that group score
-  scores[0][groupIndex]--;
+  if(scores[0][groupIndex]>0){
+    scores[0][groupIndex]--;
+  }
   groupIndex = 10;
 }
 
@@ -336,6 +347,8 @@ void deleteGroup(){
       scores[1][i+1]=0;//clear the last group data
       scores[0][i+1]=0;
     }
+      scores[1][7]=0;//delete the last row, coz the for loop can't do that
+      scores[0][7]=0;
     
     selectedGroup = 0;
     groupIndex = 10;
@@ -387,5 +400,13 @@ void blinkGroup(){
      blinkTimer = millis();
      
   } 
+  
+}
+
+void resetData(){
+  for(int i=0;i<8;i++){
+    scores[0][i] = 0;
+    scores[1][i] = i+1;
+  }
   
 }
