@@ -10,15 +10,18 @@ decode_results results;
 
 int state = 0; //0=display; 1=edit Group; 2=reset
 int selectedGroup = 0;  //which group we are dealing with
-int groupIndex = 10; //10 is a flag for nothing
+int groupIndex = 10; //10 is a flag for nothing; 9 is group does not exist
+int endIndex = 8; //which index should we put the new group
+unsigned long blinkTimer = millis();
+int blinkFlag = 0;
 int scores[2][8]{};//score array saves the group number and the score, and the order
 int key = 0;  //what key is pressed
 
 void setup() {
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-    {72,63,135,17,86,99,38,0},
-    {1,2,3,4,5,6,7,0}  
+    {0,0,0,0,0,0,0,0},
+    {1,2,3,4,5,6,7,8}  
   };
   writeData(dummyData);
 
@@ -40,6 +43,10 @@ void setup() {
 }
 
 void loop() {
+  
+  blinkGroup();
+  //Display(1, 0, 0);
+  
   getKeys();
   if(key){
     if(key>48 and key<57 and state == 0){ //pressed 1-8 group number and in display mode
@@ -47,6 +54,7 @@ void loop() {
       selectedGroup = key-48;//set the group number
     }
     if(state == 1){
+      
       if(key == 97){//pressed up button
         //add one point to the selected group 
         addScore();
@@ -56,19 +64,21 @@ void loop() {
       }else if(key == 42){//pressed * button
         //delete this selected group  
         deleteGroup();
+        state = 0;
       }else if(key == 35){//pressed # button
         //add this selected group
         addGroup();
+      }else if(key == 99){//pressed ok to exit the editing mode
+        state = 0;
+        selectedGroup = 0;
       }
     }
-    if(key == 48 and state == 1){//exit edit group mode
-      state = 0;
-      selectedGroup = 0;
-    }
+    
+    key = 0;
     sort(scores,8);
     writeData(scores);
     drawScreen();
-    key = 0;
+   
   }
 }
 
@@ -131,6 +141,7 @@ int GetNumber(int v, int places){
 }
 
 void drawScreen(){
+  clearDigits();
   for(int index=0; index<8; index++){  
     Display(index+1, scores[1][index], scores[0][index]);
   }
@@ -286,22 +297,59 @@ void addScore(){
 }
 
 void minusScore(){
-  
+  searchGroup();
+  //add one to that group score
+  scores[0][groupIndex]--;
+  groupIndex = 10;
 }
 
 void addGroup(){
   //if the group does not exist now
-  //add the group number into the scores array
+  searchGroup();
+  if(groupIndex == 9){//group does not exist
+    scores[1][endIndex] = selectedGroup;//add the group to the end of the array
+    scores[0][endIndex] = 0;
+  }
 }
 
 void deleteGroup(){
-  
+  searchGroup();
+  if(groupIndex < 9){//is the group exist?
+    scores[1][groupIndex] = 0;//delete the group ID and it's score
+    scores[0][groupIndex] = 0;
+    selectedGroup = 0;
+    groupIndex = 10;
+  }
+
 }
 
 void searchGroup(){
-  for(int i=0; groupIndex == 10; i++){
+  for(int i=0; i<8; i++){
     if(scores[1][i]==selectedGroup){
       groupIndex = i;  
     }
+    if(scores[1][i]==0 and endIndex > 7){
+      endIndex = i;
+    }
+    if(i==7 and groupIndex == 10){
+      groupIndex = 9;//group does not exist , exit the for loop
+    }
   }
+}
+
+void blinkGroup(){
+  //searchGroup();
+  if(millis() - blinkTimer > 500){
+     if(blinkFlag == 1){
+        Display(1, 1, 1);
+        blinkFlag = 0;
+     }else if(blinkFlag == 0){
+        //Display(1, 1, ' ');
+        lc.setChar(0,2,' ',false);
+        blinkFlag = 1;
+     }  
+     blinkTimer = millis();
+     
+  } 
+  
 }
