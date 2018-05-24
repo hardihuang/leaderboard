@@ -18,9 +18,10 @@ int scores[2][8]{};//score array saves the group number and the score, and the o
 int key = 0;  //what key is pressed
 
 void setup() {
+  Serial.print(9600);
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-     {72,63,135,17,86,99,38,0},
+     {0,0,0,0,0,0,0,0},
      {1,2,3,4,5,6,7,0}  
    };
   writeData(dummyData);
@@ -69,9 +70,13 @@ void loop() {
       }else if(key == 35){//pressed # button
         //add this selected group
         addGroup();
+        endIndex = 8;
+        
       }else if(key == 99){//pressed ok to exit the editing mode
         state = 0;
         selectedGroup = 0;
+        groupIndex = 10;
+        endIndex = 8;
       }
     }
     
@@ -314,7 +319,7 @@ void minusScore(){
 
 void addGroup(){
   //if the group does not exist now
-  searchGroup();
+  searchEndIndex();
   if(groupIndex == 9){//group does not exist
     scores[1][endIndex] = selectedGroup;//add the group to the end of the array
     scores[0][endIndex] = 0;
@@ -328,7 +333,7 @@ void deleteGroup(){
     for(int i=groupIndex;i<7;i++){
       scores[1][i]=scores[1][i+1];
       scores[0][i]=scores[0][i+1];
-      scores[1][i+1]=0;
+      scores[1][i+1]=0;//clear the last group data
       scores[0][i+1]=0;
     }
     
@@ -343,25 +348,42 @@ void searchGroup(){
     if(scores[1][i]==selectedGroup){
       groupIndex = i;  
     }
-    if(scores[1][i]==0 and endIndex > 7){
-      endIndex = i;
-    }
     if(i==7 and groupIndex == 10){
       groupIndex = 9;//group does not exist , exit the for loop
     }
   }
 }
 
+void searchEndIndex(){
+  for(int i=0; i<8; i++){
+    if(scores[1][i] == 0) {
+      endIndex = i;
+      break;
+    }
+  }
+}
+
 void blinkGroup(){
+  int groupIndexTemp = 0;
+  int scoreTemp = 0;
   searchGroup();
-  if(millis() - blinkTimer > 300){
-     if(blinkFlag == 1){
-        Display(groupIndex+1, selectedGroup, scores[0][groupIndex]);
-        blinkFlag = 0;
-     }else if(blinkFlag == 0){
-        Display(groupIndex+1, ' ' , ' ');
-        blinkFlag = 1;
-     }  
+  if(millis() - blinkTimer > 300 ){
+    if(groupIndex != 9){//adding scores
+      groupIndexTemp = groupIndex+1;
+      scoreTemp = scores[0][groupIndex];
+    }else if(groupIndex == 9){//creating new group
+      searchEndIndex();
+      groupIndexTemp = endIndex+1;
+      scoreTemp = ' ';
+    }
+    if(blinkFlag == 1){
+      Display(groupIndexTemp, selectedGroup, scoreTemp);
+      blinkFlag = 0;
+    }else if(blinkFlag == 0){
+      Display(groupIndexTemp, ' ' , ' ');
+      blinkFlag = 1;
+    } 
+     
      blinkTimer = millis();
      
   } 
