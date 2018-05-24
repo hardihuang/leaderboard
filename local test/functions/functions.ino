@@ -20,7 +20,7 @@ int key = 0;  //what key is pressed
 void setup() {
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-     {72,63,135,17,86,99,38,0},
+     {0,0,0,0,0,0,0,0},
      {1,2,3,4,5,6,7,0}  
    };
   writeData(dummyData);
@@ -324,8 +324,12 @@ void addGroup(){
 void deleteGroup(){
   searchGroup();
   if(groupIndex < 9){//is the group exist?
-    scores[1][groupIndex] = 0;//delete the group ID and it's score
-    scores[0][groupIndex] = 0;
+    //delete this group and move everything forward
+    for(int i=groupIndex;i<7;i++){
+      scores[1][i]=scores[1][i+1];
+      scores[0][i]=scores[0][i+1];
+    }
+    
     selectedGroup = 0;
     groupIndex = 10;
   }
