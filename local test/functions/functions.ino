@@ -20,9 +20,9 @@ int key = 0;  //what key is pressed
 void setup() {
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-    {0,0,0,0,0,0,0,0},
-    {1,2,3,4,5,6,7,8}  
-  };
+     {72,63,135,17,86,99,38,0},
+     {1,2,3,4,5,6,7,0}  
+   };
   writeData(dummyData);
 
 //initialize the program
@@ -43,9 +43,10 @@ void setup() {
 }
 
 void loop() {
-  
-  blinkGroup();
-  //Display(1, 0, 0);
+
+  if(state == 1){
+    blinkGroup();
+  }
   
   getKeys();
   if(key){
@@ -141,7 +142,7 @@ int GetNumber(int v, int places){
 }
 
 void drawScreen(){
-  clearDigits();
+  //clearDigits();
   for(int index=0; index<8; index++){  
     Display(index+1, scores[1][index], scores[0][index]);
   }
@@ -159,12 +160,6 @@ int Display(int row, int group, int score){
   int value2;
   int value3;
   boolean dp2;
-
-  //group == 0 means this group is deactivited, so set send 0XFF to turn off this row
-  if(group == 0){
-    group = 0XFF;  
-    score = 0XFF;
-  }
 
   //map each digit address to the value for each row
   //array order: addr1;digit1;addr2;digit2;addr3;digit3
@@ -247,11 +242,25 @@ int Display(int row, int group, int score){
   value3 = GetNumber(score,0);
   value2 = GetNumber(score,1);
   dp2 = GetNumber(score,2);
-  
-  lc.setDigit(addr1, digit1, (byte)value1, 0);  //group digit
-  lc.setDigit(addr2, digit2, (byte)value2, dp2);  //score tens and hundreds digit
-  lc.setDigit(addr3, digit3, (byte)value3, 0);  //score ones digit
+
+  //group == 0 means this group is deactivited, so set send 0XFF to turn off this row
+  if(group == 0){
+    value1 = ' ';  
+    value3 = ' ';
+    value2 = ' ';
+    dp2 = 0;
   }
+  if(score == ' '){  
+    value3 = ' ';
+    value2 = ' ';
+    dp2 = 0;
+  }
+
+  lc.setChar(addr1, digit1, value1, 0);  //group digit
+  lc.setChar(addr2, digit2, value2, dp2);  //score tens and hundreds digit
+  lc.setChar(addr3, digit3, value3, 0);  //score ones digit
+
+}
 
 void getKeys(){
   if(irrecv.decode(&results)){ // have we received an IR signal?
@@ -338,14 +347,13 @@ void searchGroup(){
 }
 
 void blinkGroup(){
-  //searchGroup();
-  if(millis() - blinkTimer > 500){
+  searchGroup();
+  if(millis() - blinkTimer > 300){
      if(blinkFlag == 1){
-        Display(1, 1, 1);
+        Display(groupIndex+1, selectedGroup, scores[0][groupIndex]);
         blinkFlag = 0;
      }else if(blinkFlag == 0){
-        //Display(1, 1, ' ');
-        lc.setChar(0,2,' ',false);
+        Display(groupIndex+1, ' ' , ' ');
         blinkFlag = 1;
      }  
      blinkTimer = millis();
