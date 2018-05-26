@@ -21,7 +21,7 @@ void setup() {
   //Serial.print(9600);
   //inserting the dummy data to the eeprom
   int dummyData[2][8]{
-    {5,165,6,35,35,72,0,0},
+    {121,137,6,35,35,182,0,0},
     {1,2,3,4,5,6,0,0}   
    };
   //writeData(dummyData);
@@ -262,7 +262,7 @@ int Display(int row, int group, int score){
     value2 = ' ';
     dp2 = 0;
   }
-  if(score == ' '){  
+  if(score == 200){  
     value3 = ' ';
     value2 = ' ';
     dp2 = 0;
@@ -387,13 +387,13 @@ void blinkGroup(){
     }else if(groupIndex == 9){//creating new group
       searchEndIndex();
       groupIndexTemp = endIndex+1;
-      scoreTemp = ' ';
+      scoreTemp = 200;
     }
     if(blinkFlag == 1){
       Display(groupIndexTemp, selectedGroup, scoreTemp);
       blinkFlag = 0;
     }else if(blinkFlag == 0){
-      Display(groupIndexTemp, ' ' , ' ');
+      Display(groupIndexTemp, ' ' , 200);
       blinkFlag = 1;
     } 
      
