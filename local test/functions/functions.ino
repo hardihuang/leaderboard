@@ -393,7 +393,7 @@ void blinkGroup(){
       Display(groupIndexTemp, selectedGroup, scoreTemp);
       blinkFlag = 0;
     }else if(blinkFlag == 0){
-      Display(groupIndexTemp, ' ' , 200);
+      Display(groupIndexTemp, ' ' , 200);// flag  for adding a group
       blinkFlag = 1;
     } 
      
